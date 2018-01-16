@@ -1,0 +1,30 @@
+<ha-jdbc xmlns="urn:ha-jdbc:cluster:3.0">
+    <!-- The state manager component is responsible for storing the active status of each database in the cluster, as well as any durability state -->
+    <!--<state id="simple" />-->
+
+    <!-- Defines a strategy for synchronizing a database before activation -->
+    <sync id="diff">
+        <!-- Controls the maximum number of rows to fetch from the source database at a time. -->
+        <property name="fetchSize">1000</property>
+        <!-- Controls the maximum number of insert/update/delete statements to execute within a batch. -->
+        <property name="maxBatchSize">100</property>
+    </sync>
+
+    <!-- Meta-data caching: HA-JDBC makes extensive use of database meta data. For performance purposes, this information should be cached whenever possible. -->
+    <!-- Durability: When enabled, HA-JDBC will track transactions, such that, upon restart, following a crash, it can detect and recover from any partial commits -->
+    <cluster default-sync="diff" balancer="load" meta-data-cache="none"
+             dialect="postgresql"
+             transaction-mode="parallel"
+             durability="fine"
+             auto-activate-schedule="0 * * ? * *"
+             failure-detect-schedule="0 * * ? * *">
+        <database id="database1" location="jdbc:postgresql://192.168.100.21:5432/db1" weight="1">
+            <user>postgres</user>
+            <password>postgres</password>
+        </database>
+        <database id="database2" location="jdbc:postgresql://192.168.100.22:5432/db1" weight="1">
+            <user>postgres</user>
+            <password>postgres</password>
+        </database>
+    </cluster>
+</ha-jdbc>
